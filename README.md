@@ -1,4 +1,6 @@
-# Hello! I'm Ethan.
+Hello! I'm Ethan.
+
+
 
 ## About Me
 
