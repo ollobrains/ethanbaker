@@ -4,11 +4,11 @@ Hello! I'm Ethan.
 
 ## About Me
 
-I am an 18 year old driven developer based in Davidson, NC, looking to master the many fields of computer science. My goal is to find innovative solutions to compelling problems across various disciplines. In addition to my knowledge of diverse coding modalities, I consistently work to improve my knowledge of math, science and other changing technologies.
+I am an 18 year old driven developer based in Davidson, NC, who's looking to master the many fields of computer science. My goal is to find innovative solutions to compelling problems across various disciplines. In addition to my knowledge of diverse coding modalities, I consistently work to improve my knowledge of math, science and other changing technologies.
 
 ## Tech Stack
 
-Some of the skills I have learned:
+Skills I have learned over the years:
 
 * Front and Back-end Web Developer
 * Terminal Application Developer
@@ -18,7 +18,7 @@ Some of the skills I have learned:
 
 ## Projects
 
-Some of my favorite projects:
+My favorite projects I have crafted:
 
 * [Cpick](https://github.com/ethanbaker/cpick/). An extensive color picker in the terminal.
 * [Train Your Dragon](https://github.com/ethanbaker/train-your-dragon/). A text based Python game.
