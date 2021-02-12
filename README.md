@@ -1,10 +1,10 @@
-## Hello! I'm Ethan.
+# Hello! I'm Ethan.
 
-### About Me
+## About Me
 
 I am an 18 year old driven developer based in Davidson, NC, looking to master the many fields of computer science. My goal is to find innovative solutions to compelling problems across various disciplines. In addition to my knowledge of diverse coding modalities, I consistently work to improve my knowledge of math, science and other changing technologies.
 
-### Tech Stack
+## Tech Stack
 
 Some of the skills I have learned:
 
@@ -14,7 +14,7 @@ Some of the skills I have learned:
 * Data Science and Artificial Intelligence Analyzer
 * Biology/Chemistry/Physics/Calculus Enthusiast 
 
-### Projects
+## Projects
 
 Some of my favorite projects:
 
@@ -25,7 +25,7 @@ Some of my favorite projects:
 * [Colors](https://github.com/ethanbaker/colors). All things colors for Golang.
 * [Insanity 2](https://github.com/ethanbaker/insanity2). A rage inducing 2D Phaser game.
 
-### Contact
+## Contact
 
 Want to get in touch? You can find me anywhere below:
 
