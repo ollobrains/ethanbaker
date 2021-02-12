@@ -26,6 +26,7 @@ My favorite projects I have crafted:
 * [Tank Trouble](https://github.com/ethanbaker/tank-trouble). Multiplayer web socket game with tanks.
 * [Colors](https://github.com/ethanbaker/colors). All things colors for Golang.
 * [Insanity 2](https://github.com/ethanbaker/insanity2). A rage inducing 2D Phaser game.
+* [Personal Website](https://github.com/ethanbaker/ethanbaker.dev). My own, handcrafted personal website.
 
 ## Contact
 
