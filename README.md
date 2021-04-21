@@ -21,12 +21,13 @@ Skills I have learned over the years:
 My favorite projects I have crafted:
 
 * [Cpick](https://github.com/ethanbaker/cpick/). An extensive color picker in the terminal.
-* [Train Your Dragon](https://github.com/ethanbaker/train-your-dragon/). A text based Python game.
+* [Personal Website](https://github.com/ethanbaker/ethanbaker.dev). My own, handcrafted personal website.
+* [Productivity GUI](https://github.com/ethanbaker/productivity-gui). A productivity tool in the web browser with REST apis.
 * [Cava](https://github.com/ethanbaker/cava-web-gui). Web GUI for virtual assistant.
 * [Tank Trouble](https://github.com/ethanbaker/tank-trouble). Multiplayer web socket game with tanks.
 * [Colors](https://github.com/ethanbaker/colors). All things colors for Golang.
 * [Insanity 2](https://github.com/ethanbaker/insanity2). A rage inducing 2D Phaser game.
-* [Personal Website](https://github.com/ethanbaker/ethanbaker.dev). My own, handcrafted personal website.
+* [Train Your Dragon](https://github.com/ethanbaker/train-your-dragon/). A text based Python game.
 
 ## Contact
 
