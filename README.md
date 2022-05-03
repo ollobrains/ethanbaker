@@ -4,13 +4,13 @@ Hello! I'm Ethan.
 
 ## About Me
 
-I am an 18 year old driven developer based in Davidson, NC, who's looking to master the many fields of computer science. My goal is to find innovative solutions to compelling problems across various disciplines. In addition to my knowledge of diverse coding modalities, I consistently work to improve my knowledge of math, science and other changing technologies.
+I am a 19 year old driven developer based in North Carolina who's looking to master the many fields of computer science. My goal is to find innovative solutions to compelling problems across various disciplines. In addition to my knowledge of diverse coding modalities, I consistently work to improve my knowledge of math, science and other changing technologies.
 
 ## Tech Stack
 
 Skills I have learned over the years:
 
-* Front and Back-end Web Developer
+* Front and Back end Web Developer
 * Terminal Application Developer
 * Javascript/Golang/Bash/Python Coder
 * Data Science and Artificial Intelligence Analyzer
@@ -23,7 +23,6 @@ My favorite projects I have crafted:
 * [Cpick](https://github.com/ethanbaker/cpick/). An extensive color picker in the terminal.
 * [Personal Website](https://github.com/ethanbaker/ethanbaker.dev). My own, handcrafted personal website.
 * [Productivity GUI](https://github.com/ethanbaker/productivity-gui). A productivity tool in the web browser with REST apis.
-* [Cava](https://github.com/ethanbaker/cava-web-gui). Web GUI for virtual assistant.
 * [Tank Trouble](https://github.com/ethanbaker/tank-trouble). Multiplayer web socket game with tanks.
 * [Colors](https://github.com/ethanbaker/colors). All things colors for Golang.
 * [Insanity 2](https://github.com/ethanbaker/insanity2). A rage inducing 2D Phaser game.
