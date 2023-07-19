@@ -9,7 +9,7 @@ My favorite projects I have crafted:
 
 * [cpick](https://github.com/ethanbaker/cpick): An extensive color picker for the terminal!
 * [tank-trouble](https://github.com/ethanbaker/tank-trouble): A tank trouble multiplayer websocket game
-* [productivity](https://github.com/ethanbaker/productivity): A productivity tool built with Javascript in the web browser.
+* [productivity](https://github.com/ethanbaker/productivity): A productivity tool built with vanilla HTML, CSS, and JS in the web browser.
 * [game-ai](https://github.com/ethanbaker/game-ai): An exploration of how artificial intelligence plays a role in modern games
 
 
@@ -60,4 +60,4 @@ Want to get in touch? You can find me anywhere below:
 * [LinkedIn](https://www.linkedin.com/in/ethan-baker-802b2a183)
 * [GitHub](https://github.com/ethanbaker)
 
-<sub>Last updated on: Tue Jul 18 02:02 2023</sub>
+<sub>Last updated on: Wed Jul 19 02:51 2023</sub>
