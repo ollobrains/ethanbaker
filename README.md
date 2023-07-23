@@ -8,9 +8,9 @@ I am a 20 year old driven developer attending North Carolina State University wh
 My favorite projects I have crafted:
 
 * [cpick](https://github.com/ethanbaker/cpick): An extensive color picker for the terminal!
-* [tank-trouble](https://github.com/ethanbaker/tank-trouble): A tank trouble multiplayer websocket game
 * [productivity](https://github.com/ethanbaker/productivity): A productivity tool built with vanilla HTML, CSS, and JS in the web browser.
 * [game-ai](https://github.com/ethanbaker/game-ai): An exploration of how artificial intelligence plays a role in modern games
+* [notion](https://github.com/ethanbaker/notion): All of my notion embeds/integrations
 
 
 ## Tech Stack
@@ -60,4 +60,4 @@ Want to get in touch? You can find me anywhere below:
 * [LinkedIn](https://www.linkedin.com/in/ethan-baker-802b2a183)
 * [GitHub](https://github.com/ethanbaker)
 
-<sub>Last updated on: Sat Jul 22 01:33 2023</sub>
+<sub>Last updated on: Sun Jul 23 01:40 2023</sub>
