@@ -60,4 +60,4 @@ Want to get in touch? You can find me anywhere below:
 * [LinkedIn](https://www.linkedin.com/in/ethan-baker-802b2a183)
 * [GitHub](https://github.com/ethanbaker)
 
-<sub>Last updated on: Wed Oct 4 01:14 2023</sub>
+<sub>Last updated on: Thu Oct 5 01:12 2023</sub>
