@@ -1,7 +1,7 @@
 Hello! I'm Ethan.
 ## About Me
 
-I am a 20 year old driven developer attending North Carolina State University who’s looking to master the many fields of computer science. My goal is to find innovative solutions to compelling problems across various disciplines. In addition to my knowledge of diverse coding modalities, I consistently work to improve my knowledge of math, science and other changing technologies.
+I am a 21 year old driven developer attending North Carolina State University who’s looking to master the many fields of computer science. My goal is to find innovative solutions to compelling problems across various disciplines. In addition to my knowledge of diverse coding modalities, I consistently work to improve my knowledge of math, science and other changing technologies.
 
 ## Projects
 
@@ -60,4 +60,4 @@ Want to get in touch? You can find me anywhere below:
 * [LinkedIn](https://www.linkedin.com/in/ethan-baker-802b2a183)
 * [GitHub](https://github.com/ethanbaker)
 
-<sub>Last updated on: Wed Feb 7 01:09 2024</sub>
+<sub>Last updated on: Thu Feb 8 01:10 2024</sub>
