@@ -5,25 +5,66 @@ on:
     branches:
       - main
   schedule:
+    # Run daily at midnight (UTC)
     - cron: '0 0 * * *'
+  # Allow manual runs from the Actions tab
+  workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  update-readme:
+    name: Build and Deploy Dynamic README
     runs-on: ubuntu-latest
 
     steps:
-      - name: Get current copy
-        uses: actions/checkout@main
+      - name: Check out repository
+        uses: actions/checkout@v3
         with:
-          fetch-depth: 1
-      - name: Create README
+          fetch-depth: 0  # Allows us to see all history for diff/changes checks
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '1.19'  # or whichever version you need
+
+      - name: Cache Go modules
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
+      - name: Build README
         run: |
-          cd ${GITHUB_WORKSPACE}/.update/
+          cd .update
+          go mod tidy
           go run main.go
-      - name: Deploy
+        # You might specify GOOS, GOARCH if needed
+
+      # Optional: check if the newly generated README actually changed
+      - name: Check for changes
+        id: git_diff
         run: |
-          git config user.name "${GITHUB_ACTOR}"
-          git config user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git add .
-          git commit -am "auto: Update dynamic content"
-          git push --all -f https://${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git
+          # Save the current state (so it doesn't auto-commit everything)
+          git add --all
+          # Use diff-index to detect changes against HEAD
+          if git diff-index --quiet HEAD; then
+            echo "no_changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "no_changes=false" >> $GITHUB_OUTPUT
+            # We'll commit and push in the next step if changes are found
+          fi
+
+      - name: Commit and push changes
+        if: steps.git_diff.outputs.no_changes == 'false'
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
+          # Commit
+          git commit -m "auto: Update dynamic content (README) [skip ci]"
+          # Push using the token
+          git push "https://${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" HEAD:main
+
+      - name: Notify No Changes
+        if: steps.git_diff.outputs.no_changes == 'true'
+        run: echo "No changes detected in README. Skipping commit."
