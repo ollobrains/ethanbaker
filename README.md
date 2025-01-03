@@ -1,4 +1,4 @@
-Hello! I'm Ethan.
+Hello! I'm Ethan. Testing to see if i can fork this project.
 ## About Me
 
 I am a 21 year old driven developer attending North Carolina State University who’s looking to master the many fields of computer science. My goal is to find innovative solutions to compelling problems across various disciplines. In addition to my knowledge of diverse coding modalities, I consistently work to improve my knowledge of math, science and other changing technologies.
