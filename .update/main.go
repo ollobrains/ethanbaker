@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"net/http"
-	"os"
-	"strings"
-	"sync"
-	"time"
+    "errors"
+    "fmt"
+    "log"
+    "net/http"
+    "os"
+    "strings"
+    "sync"
+    "time"
 
-	"github.com/PuerkitoBio/goquery"
+    "github.com/PuerkitoBio/goquery"
 )
 
 // README_TEMPLATE is the template for the generated README.md content.
@@ -17,7 +18,11 @@ var README_TEMPLATE = `Hello! I'm Ethan.
 
 ## About Me
 
-I am a %v year old driven developer attending North Carolina State University who's looking to master the many fields of computer science. My goal is to find innovative solutions to compelling problems across various disciplines. In addition to my knowledge of diverse coding modalities, I consistently work to improve my knowledge of math, science and other changing technologies.
+I am a %v year old driven developer attending North Carolina State University
+who's looking to master the many fields of computer science. My goal is to find
+innovative solutions to compelling problems across various disciplines. In addition
+to my knowledge of diverse coding modalities, I consistently work to improve my
+knowledge of math, science and other changing technologies.
 
 ## Projects
 
@@ -31,7 +36,7 @@ Skills I have learned and honed over the years:
 
 * Frontend
   * HTML, CSS, JS
-  * Typescript
+  * TypeScript
   * Angular/AngularJS
 * Backend
   * Golang
@@ -81,91 +86,103 @@ const fallbackPinnedMsg = "* No pinned repositories found or there was an issue 
 // GITHUB_USER_ENV_KEY is the environment variable key for overriding the GitHub username.
 const GITHUB_USER_ENV_KEY = "GITHUB_USER"
 
-// repoCountLimit is an optional limit to how many pinned repos we display (if desired).
-const repoCountLimit = 10 // or set to 0 if unlimited
-
-// calculateAge determines the user's age based on a fixed birth date.
-func calculateAge() string {
-	birthdate := time.Date(2003, time.February, 8, 0, 0, 0, 0, time.UTC)
-	now := time.Now()
-
-	years := now.Year() - birthdate.Year()
-	if now.YearDay() < birthdate.YearDay() {
-		years--
-	}
-	return fmt.Sprint(years)
-}
-
-// findPinnedRepos scrapes the GitHub user's pinned repositories from the GitHub profile.
-// Returns a formatted string of repo info or a fallback message if none found.
-func findPinnedRepos(githubUser string) string {
-	profileURL := fmt.Sprintf("https://github.com/%s", githubUser)
-
-	res, err := http.Get(profileURL)
-	if err != nil {
-		log.Printf("[WARN] Could not fetch pinned repos from: %s, err: %v\n", profileURL, err)
-		return fallbackPinnedMsg
-	}
-	defer res.Body.Close()
-
-	if res.StatusCode != 200 {
-		log.Printf("[WARN] Non-200 status code: %d %s\n", res.StatusCode, res.Status)
-		return fallbackPinnedMsg
-	}
-
-	doc, err := goquery.NewDocumentFromReader(res.Body)
-	if err != nil {
-		log.Printf("[WARN] Error loading HTML doc: %v\n", err)
-		return fallbackPinnedMsg
-	}
-
-	output := ""
-	counter := 0
-
-	doc.Find(".pinned-item-list-item-content").Each(func(i int, s *goquery.Selection) {
-		if repoCountLimit > 0 && counter >= repoCountLimit {
-			return
-		}
-		title := s.Find("a > span").Text()
-		link := s.Find("a").AttrOr("href", "invalid")
-		desc := s.Find(".pinned-item-desc").Text()
-
-		output += fmt.Sprintf("* [%v](https://github.com%v): %v\n", title, link, strings.TrimSpace(desc))
-		counter++
-	})
-
-	if output == "" {
-		return fallbackPinnedMsg
-	}
-	return output
-}
+// repoCountLimit is an optional limit for how many pinned repos to display.
+const repoCountLimit = 10 // set to 0 for no limit
 
 func main() {
-	// Overriding GitHub username from environment variable, if present
-	githubUser := os.Getenv(GITHUB_USER_ENV_KEY)
-	if githubUser == "" {
-		githubUser = "ethanbaker" // default user
-	}
+    // 1. Determine GitHub username
+    githubUser := os.Getenv(GITHUB_USER_ENV_KEY)
+    if githubUser == "" {
+        githubUser = "ethanbaker" // default user
+    }
 
-	var pinnedRepos string
-	wg := sync.WaitGroup{}
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		pinnedRepos = findPinnedRepos(githubUser)
-	}()
+    // 2. Calculate user’s age
+    ageString := calculateAge()
 
-	age := calculateAge()
-	last := time.Now().Format("Mon Jan 2 15:04 2006")
+    // 3. Asynchronously fetch pinned repos
+    var pinnedRepos string
+    var pinnedErr error
 
-	wg.Wait()
+    wg := sync.WaitGroup{}
+    wg.Add(1)
+    go func() {
+        defer wg.Done()
+        pinnedRepos, pinnedErr = findPinnedRepos(githubUser)
+        if pinnedErr != nil {
+            log.Printf("[WARN] Could not fetch pinned repos: %v\n", pinnedErr)
+            pinnedRepos = fallbackPinnedMsg
+        }
+    }()
+    wg.Wait()
 
-	readmeContent := fmt.Sprintf(README_TEMPLATE, age, pinnedRepos, last)
+    // 4. Generate final README content
+    lastUpdated := time.Now().Format("Mon Jan 2 15:04 2006")
+    readmeContent := fmt.Sprintf(README_TEMPLATE, ageString, pinnedRepos, lastUpdated)
 
-	err := os.WriteFile("../README.md", []byte(readmeContent), 0644)
-	if err != nil {
-		log.Fatalf("[FATAL] Failed to create README file: %v\n", err)
-	}
+    // 5. Write content to README.md
+    if err := os.WriteFile("../README.md", []byte(readmeContent), 0644); err != nil {
+        log.Fatalf("[FATAL] Failed to create README file: %v\n", err)
+    }
 
-	log.Printf("[INFO] README updated successfully for user: %s\n", githubUser)
+    log.Printf("[INFO] README updated successfully for user: %s\n", githubUser)
+}
+
+// calculateAge determines your age based on a fixed birthdate.
+func calculateAge() string {
+    birthdate := time.Date(2003, time.February, 8, 0, 0, 0, 0, time.UTC)
+    now := time.Now()
+
+    years := now.Year() - birthdate.Year()
+    // If today's day of year is before the birthdate day of year, subtract one year.
+    if now.YearDay() < birthdate.YearDay() {
+        years--
+    }
+    return fmt.Sprint(years)
+}
+
+// findPinnedRepos scrapes pinned repositories from a user's GitHub profile
+// and returns formatted bullet items, or an error if unsuccessful.
+func findPinnedRepos(githubUser string) (string, error) {
+    profileURL := fmt.Sprintf("https://github.com/%s", githubUser)
+    res, err := http.Get(profileURL)
+    if err != nil {
+        return "", fmt.Errorf("could not fetch: %s, error: %w", profileURL, err)
+    }
+    defer res.Body.Close()
+
+    if res.StatusCode != http.StatusOK {
+        return "", fmt.Errorf("non-200 status code: %d %s", res.StatusCode, res.Status)
+    }
+
+    doc, err := goquery.NewDocumentFromReader(res.Body)
+    if err != nil {
+        return "", fmt.Errorf("error loading HTML doc: %w", err)
+    }
+
+    var output strings.Builder
+    counter := 0
+
+    doc.Find(".pinned-item-list-item-content").Each(func(i int, s *goquery.Selection) {
+        if repoCountLimit > 0 && counter >= repoCountLimit {
+            return
+        }
+        title := s.Find("a > span").Text()
+        link := s.Find("a").AttrOr("href", "")
+        desc := s.Find(".pinned-item-desc").Text()
+
+        // Trim leading/trailing whitespace from description
+        desc = strings.TrimSpace(desc)
+
+        if link != "" && title != "" {
+            // Format a bullet item
+            output.WriteString(fmt.Sprintf("* [%s](https://github.com%s): %s\n", title, link, desc))
+            counter++
+        }
+    })
+
+    // If no pinned repos found, return fallback
+    if output.Len() == 0 {
+        return "", errors.New("no pinned repositories found")
+    }
+    return output.String(), nil
 }
