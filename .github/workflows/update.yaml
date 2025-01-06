@@ -1,42 +1,201 @@
-name: update-readme
+#!/usr/bin/env bash
+#
+# build_unity.sh
+#
+# A more generalized Unity build & test script with multi-target support,
+# environment detection, better logging, and optional local/CI modes.
+#
 
-on:
-  push:
-    branches:
-      - main
-  schedule:
-    - cron: '0 0 * * *'  # Runs daily at midnight UTC
+# --------------------------
+# 1. HELPER: ENV DETECTION
+# --------------------------
+if [[ -z "${UNITY_PATH}" ]]; then
+  # fallback approach if user hasn't set UNITY_PATH manually
+  # or if we are on a known CI environment
+  case "$(uname -s)" in
+    Darwin*)
+      # On macOS, might assume standard location or GitHub Actions mac runner
+      UNITY_PATH="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
+      ;;
+    MINGW*|MSYS*|CYGWIN*)
+      # Windows-based
+      UNITY_PATH="C:\\Program Files\\Unity\\Editor\\Unity.exe"
+      ;;
+    Linux*)
+      # Potentially a Docker container or Linux-based runner
+      UNITY_PATH="/opt/Unity/Editor/Unity"
+      ;;
+    *)
+      echo "[WARN] Could not auto-detect Unity path. Falling back to Mac path."
+      UNITY_PATH="/Applications/Unity/Unity.app/Contents/MacOS/Unity"
+      ;;
+  esac
+fi
 
-jobs:
-  build-and-deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
-        with:
-          # If you have a large repo and only need a few files, consider 'fetch-depth: 0'
-          fetch-depth: 1
+echo "[INFO] Using Unity executable: ${UNITY_PATH}"
+if [[ ! -f "${UNITY_PATH}" ]]; then
+  echo "[ERROR] Unity executable not found: ${UNITY_PATH}"
+  exit 1
+fi
 
-      - name: Set up Go environment
-        uses: actions/setup-go@v3
-        with:
-          go-version: '1.19'  # or whichever stable version you want
+# --------------------------
+# 2. ARG PARSING
+# --------------------------
+BUILD_TARGET="Win64"    # default build target
+BUILD_OUTPUT_DIR="./Builds"
+PROJECT_PATH="$(pwd)"   # default to current dir
+RUN_TESTS="true"
 
-      - name: Generate README
-        run: |
-          cd "${{ github.workspace }}/.update"
-          go run main.go
-        # If your script requires environment variables like GITHUB_USER, add:
-        # env:
-        #   GITHUB_USER: ${{ secrets.GITHUB_USER }}
+usage() {
+  echo "Usage: $0 [options]"
+  echo "  -t, --target          Build target (Win64, OSXUniversal, WebGL, iOS, Android, etc.)"
+  echo "  -o, --output-dir      Where to put built artifacts (default=./Builds)"
+  echo "  -p, --project-path    Unity project path (default=current directory)"
+  echo "  --no-tests            Skip running Unity tests"
+  echo "  -h, --help            Show this message"
+  exit 1
+}
 
-      - name: Commit and push changes
-        run: |
-          git config user.name "${{ github.actor }}"
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git add -A
-          # The commit command will fail if no changes have been made, so we handle that gracefully:
-          git commit -m "auto: Update dynamic content" || echo "No changes to commit."
-          git push origin HEAD:main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -t|--target)
+      BUILD_TARGET="$2"
+      shift 2
+      ;;
+    -o|--output-dir)
+      BUILD_OUTPUT_DIR="$2"
+      shift 2
+      ;;
+    -p|--project-path)
+      PROJECT_PATH="$2"
+      shift 2
+      ;;
+    --no-tests)
+      RUN_TESTS="false"
+      shift 1
+      ;;
+    -h|--help)
+      usage
+      ;;
+    *)
+      echo "[WARN] Unknown option: $1"
+      usage
+      ;;
+  esac
+done
+
+mkdir -p "${BUILD_OUTPUT_DIR}"
+
+# --------------------------
+# 3. TEST RUN
+# --------------------------
+if [[ "${RUN_TESTS}" == "true" ]]; then
+  echo "[INFO] Running Unity Editor tests..."
+  TEST_RESULT_FILE="${PROJECT_PATH}/EditorTestResults.xml"
+  LOG_FILE="${PROJECT_PATH}/unity_test.log"
+
+  # Remove old result file if it exists
+  [[ -f "${TEST_RESULT_FILE}" ]] && rm -f "${TEST_RESULT_FILE}"
+
+  "${UNITY_PATH}" \
+    -batchmode \
+    -nographics \
+    -projectPath "${PROJECT_PATH}" \
+    -runEditorTests \
+    -editorTestsResultFile "${TEST_RESULT_FILE}" \
+    -logFile "${LOG_FILE}" \
+    -quit
+
+  # Check if test result file was actually created
+  if [[ ! -f "${TEST_RESULT_FILE}" ]]; then
+    echo "[ERROR] No test results found! Possibly a compilation error. Check logs."
+    if [[ -f "${LOG_FILE}" ]]; then
+      echo "[INFO] Log file content (Unity compilation issues):"
+      # Display lines between 'CompilerOutput:' and 'EndCompilerOutput' for clarity
+      awk '/CompilerOutput:/,/EndCompilerOutput/' "${LOG_FILE}"
+    fi
+    exit 1
+  fi
+
+  # Basic parse for failed or inconclusive tests
+  RESULT=$(sed -n 's/.*<test-run[^>]*result="\([^"]*\).*/\1/p' "${TEST_RESULT_FILE}")
+  FAIL_COUNT=$(sed -n 's/.*<test-run[^>]*failed="\([^"]*\).*/\1/p' "${TEST_RESULT_FILE}")
+  INCONC_COUNT=$(sed -n 's/.*<test-run[^>]*inconclusive="\([^"]*\).*/\1/p' "${TEST_RESULT_FILE}")
+
+  echo "[INFO] Unity tests result: ${RESULT}. Failed=${FAIL_COUNT}, Inconclusive=${INCONC_COUNT}"
+
+  # If any failures or inconclusive
+  if [[ "${FAIL_COUNT}" -gt 0 || "${INCONC_COUNT}" -gt 0 ]]; then
+    echo "[ERROR] Unit tests indicated issues. Aborting build step."
+    # Optionally parse out the test-case lines that failed
+    echo "[INFO] The following tests failed (if any):"
+    grep 'result="Failed"' "${TEST_RESULT_FILE}" | grep 'test-case'
+    exit 1
+  fi
+
+  echo "[INFO] Tests passed successfully."
+fi
+
+# --------------------------
+# 4. BUILD
+# --------------------------
+# For each known target, we produce the correct command line arguments.
+# You can expand or modify for each platform as needed.
+case "${BUILD_TARGET}" in
+  "Win64")
+    BUILD_PATH="${BUILD_OUTPUT_DIR}/MyGameWin64.exe"
+    BUILD_CMD="-buildWindows64Player \"${BUILD_PATH}\""
+    ;;
+  "Win32")
+    BUILD_PATH="${BUILD_OUTPUT_DIR}/MyGameWin32.exe"
+    BUILD_CMD="-buildWindowsPlayer \"${BUILD_PATH}\""
+    ;;
+  "OSXUniversal")
+    BUILD_PATH="${BUILD_OUTPUT_DIR}/MyGame.app"
+    BUILD_CMD="-buildOSXUniversalPlayer \"${BUILD_PATH}\""
+    ;;
+  "WebGL")
+    BUILD_PATH="${BUILD_OUTPUT_DIR}/WebGL"
+    BUILD_CMD="-buildWebGLPlayer \"${BUILD_PATH}\""
+    ;;
+  "iOS")
+    BUILD_PATH="${BUILD_OUTPUT_DIR}/iOSBuild"
+    BUILD_CMD="-buildTarget iOS -executeMethod BuildPipeline.BuildPlayer -buildPath \"${BUILD_PATH}\""
+    # This is more complicated. Possibly you do: -buildOSXUniversalPlayer
+    ;;
+  "Android")
+    BUILD_PATH="${BUILD_OUTPUT_DIR}/MyGame.apk"
+    BUILD_CMD="-buildTarget Android -executeMethod BuildPipeline.BuildPlayer -customBuildName MyGame -customBuildPath \"${BUILD_PATH}\""
+    ;;
+  *)
+    echo "[ERROR] Unknown build target: ${BUILD_TARGET}"
+    exit 1
+    ;;
+esac
+
+echo "[INFO] Building Unity project for target: ${BUILD_TARGET}"
+BUILD_LOG="${PROJECT_PATH}/unity_build.log"
+
+"${UNITY_PATH}" \
+  -batchmode \
+  -nographics \
+  -projectPath "${PROJECT_PATH}" \
+  ${BUILD_CMD} \
+  -logFile "${BUILD_LOG}" \
+  -quit
+
+if [[ $? -ne 0 ]]; then
+  echo "[ERROR] Unity build step failed. Check the logs."
+  if [[ -f "${BUILD_LOG}" ]]; then
+    # Display lines between 'CompilerOutput:' and 'EndCompilerOutput:' for errors
+    echo "[INFO] Potential compiler errors in logs:"
+    awk '/CompilerOutput:/,/EndCompilerOutput/' "${BUILD_LOG}"
+  fi
+  exit 1
+fi
+
+echo "[INFO] Build completed successfully. Output located at: ${BUILD_PATH}"
+
+# Done
+exit 0
+
